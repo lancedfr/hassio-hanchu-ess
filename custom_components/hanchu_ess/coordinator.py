@@ -300,6 +300,7 @@ class HanchuPowerCoordinator(DataUpdateCoordinator[dict]):
         return {
             "battery_soc":            round(float(raw_soc) * 100, 1),
             "solar_power":            float(device.get("pvTtPwr") or 0),
+            "ext_solar_power":        float(device.get("bypMeterTotalPower") or 0),
             "load_power":             float(device.get("loadPwr") or 0),
             "grid_import_power":      max(0.0, grid_raw),
             "grid_export_power":      max(0.0, -grid_raw),

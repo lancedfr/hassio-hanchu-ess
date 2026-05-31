@@ -62,6 +62,7 @@ Polled every **10 minutes** from the `powerChart` endpoint.
 | Sensor | Description |
 |--------|-------------|
 | **Solar Production Power** | Current solar panel output |
+| **Ac Coupled Solar Power** | Current AC Coupled Inverter output |
 | **Home Usage Power** | Current household power consumption |
 | **Grid Import Power** | Power currently being drawn from the grid (0 when exporting) |
 | **Grid Export Power** | Power currently being sent to the grid (0 when importing) |

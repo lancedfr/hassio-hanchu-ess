@@ -31,6 +31,7 @@ _ENERGY_SENSORS: list[tuple[str, str, str]] = [
 # (key in coordinator.data, display name, icon)
 _POWER_SENSORS: list[tuple[str, str, str]] = [
     ("solar_power",             "Solar Production Power",  "mdi:solar-power-variant"),
+    ("ext_solar_power",         "AC Coupled Solar Power",  "mdi:solar-power-variant"),
     ("load_power",              "Home Usage Power",        "mdi:home-lightning-bolt"),
     ("grid_import_power",       "Grid Import Power",       "mdi:transmission-tower-import"),
     ("grid_export_power",       "Grid Export Power",       "mdi:transmission-tower-export"),
