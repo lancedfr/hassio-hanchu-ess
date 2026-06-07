@@ -18,7 +18,7 @@ if str(_ROOT) not in sys.path:
 
 def _make_settings_coordinator(token: str | None = "test.jwt.token", sn: str = "TEST_SN"):
     """Return a HanchuSettingsCoordinator with HA internals and auth stubbed out."""
-    from custom_components.hanchu.coordinator import HanchuSettingsCoordinator
+    from custom_components.hanchu_ess.coordinator import HanchuSettingsCoordinator
 
     hass = MagicMock()
     entry = MagicMock()
@@ -90,7 +90,7 @@ class TestHanchuSettingsCoordinatorRead(unittest.IsolatedAsyncioTestCase):
         coord = _make_settings_coordinator()
         session, _ = _make_session(payload=_full_settings_payload())
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             result = await coord._async_update_data()
 
         self.assertEqual(result["WORK_MODE_CMB"], "3")
@@ -102,7 +102,7 @@ class TestHanchuSettingsCoordinatorRead(unittest.IsolatedAsyncioTestCase):
         coord = _make_settings_coordinator()
         session, _ = _make_session(payload=payload)
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             result = await coord._async_update_data()
 
         self.assertIn("WORK_MODE_CMB", result)
@@ -122,7 +122,7 @@ class TestHanchuSettingsCoordinatorRead(unittest.IsolatedAsyncioTestCase):
         coord = _make_settings_coordinator()
         session, _ = _make_session(status=401, payload={})
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             with self.assertRaises(ConfigEntryAuthFailed):
                 await coord._async_update_data()
 
@@ -133,7 +133,7 @@ class TestHanchuSettingsCoordinatorRead(unittest.IsolatedAsyncioTestCase):
         coord = _make_settings_coordinator()
         session, _ = _make_session(payload={"code": 500, "msg": "error"})
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             with self.assertRaises(UpdateFailed):
                 await coord._async_update_data()
 
@@ -149,18 +149,18 @@ class TestHanchuSettingsCoordinatorRead(unittest.IsolatedAsyncioTestCase):
         session = MagicMock()
         session.post = MagicMock(return_value=cm)
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             with self.assertRaises(UpdateFailed):
                 await coord._async_update_data()
 
     async def test_request_targets_iot_get_url(self) -> None:
         """POST must target the iotGet endpoint."""
-        from custom_components.hanchu.const import IOT_GET_URL
+        from custom_components.hanchu_ess.const import IOT_GET_URL
 
         coord = _make_settings_coordinator()
         session, _ = _make_session(payload=_full_settings_payload())
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             await coord._async_update_data()
 
         self.assertEqual(session.post.call_args.args[0], IOT_GET_URL)
@@ -170,7 +170,7 @@ class TestHanchuSettingsCoordinatorRead(unittest.IsolatedAsyncioTestCase):
         coord = _make_settings_coordinator(token="settings.token")
         session, _ = _make_session(payload=_full_settings_payload())
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             await coord._async_update_data()
 
         headers = session.post.call_args.kwargs["headers"]
@@ -231,13 +231,13 @@ class TestHanchuSettingsCoordinatorWrite(unittest.IsolatedAsyncioTestCase):
 
     async def test_write_success_calls_iot_set_url(self) -> None:
         """Write must POST to the iotSet endpoint."""
-        from custom_components.hanchu.const import IOT_SET_URL
+        from custom_components.hanchu_ess.const import IOT_SET_URL
 
         coord = _make_settings_coordinator()
         coord.async_refresh = AsyncMock()
         session, _ = _make_session(payload={"code": 200, "msg": "Success!", "data": {}})
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             await coord.async_set_settings({"WORK_MODE_CMB": 3})
 
         self.assertEqual(session.post.call_args.args[0], IOT_SET_URL)
@@ -249,7 +249,7 @@ class TestHanchuSettingsCoordinatorWrite(unittest.IsolatedAsyncioTestCase):
         coord.async_refresh = refresh_mock
         session, _ = _make_session(payload={"code": 200, "msg": "Success!", "data": {}})
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             await coord.async_set_settings({"CHG_PWR_LMT": 3000})
 
         refresh_mock.assert_awaited_once()
@@ -270,7 +270,7 @@ class TestHanchuSettingsCoordinatorWrite(unittest.IsolatedAsyncioTestCase):
         coord.async_refresh = AsyncMock()
         session, _ = _make_session(payload={"code": 500, "msg": "device error"})
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             with self.assertRaises(UpdateFailed):
                 await coord.async_set_settings({"WORK_MODE_CMB": 1})
 
@@ -286,7 +286,7 @@ class TestHanchuSettingsCoordinatorWrite(unittest.IsolatedAsyncioTestCase):
         session = MagicMock()
         session.post = MagicMock(return_value=cm)
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             with self.assertRaises(UpdateFailed):
                 await coord.async_set_settings({"CHG_PWR_LMT": 2000})
 
@@ -324,7 +324,7 @@ class TestHanchuSettingsCoordinatorPending(unittest.IsolatedAsyncioTestCase):
         coord.async_refresh = AsyncMock()
         session, _ = _make_session(payload={"code": 200, "msg": "Success!", "data": {}})
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             await coord.async_set_settings({"CHG_PWR_LMT": 3000})
 
         self.assertEqual(coord._pending, {})
@@ -335,7 +335,7 @@ class TestHanchuSettingsCoordinatorPending(unittest.IsolatedAsyncioTestCase):
         coord._pending = {"CHG_PWR_LMT": 3000}
         session, _ = _make_session(payload=_full_settings_payload())
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             await coord._async_update_data()
 
         self.assertEqual(coord._pending, {})
@@ -350,29 +350,29 @@ class TestTimePeriodConversion(unittest.TestCase):
     def test_seconds_to_time_04_00(self) -> None:
         import datetime
 
-        from custom_components.hanchu.time import _seconds_to_time
+        from custom_components.hanchu_ess.time import _seconds_to_time
         self.assertEqual(_seconds_to_time(14400), datetime.time(4, 0))
 
     def test_seconds_to_time_05_30(self) -> None:
         import datetime
 
-        from custom_components.hanchu.time import _seconds_to_time
+        from custom_components.hanchu_ess.time import _seconds_to_time
         self.assertEqual(_seconds_to_time(19800), datetime.time(5, 30))
 
     def test_seconds_to_time_midnight(self) -> None:
         import datetime
 
-        from custom_components.hanchu.time import _seconds_to_time
+        from custom_components.hanchu_ess.time import _seconds_to_time
         self.assertEqual(_seconds_to_time(0), datetime.time(0, 0))
 
     def test_seconds_to_time_23_59(self) -> None:
         import datetime
 
-        from custom_components.hanchu.time import _seconds_to_time
+        from custom_components.hanchu_ess.time import _seconds_to_time
         self.assertEqual(_seconds_to_time(86340), datetime.time(23, 59))
 
     def test_time_to_seconds_roundtrip(self) -> None:
-        from custom_components.hanchu.time import _seconds_to_time, _time_to_seconds
+        from custom_components.hanchu_ess.time import _seconds_to_time, _time_to_seconds
         for secs in [0, 14400, 19800, 61500, 86340]:
             t = _seconds_to_time(secs)
             self.assertEqual(_time_to_seconds(t), secs)
@@ -380,8 +380,138 @@ class TestTimePeriodConversion(unittest.TestCase):
     def test_time_to_seconds_04_00(self) -> None:
         import datetime
 
-        from custom_components.hanchu.time import _time_to_seconds
+        from custom_components.hanchu_ess.time import _time_to_seconds
         self.assertEqual(_time_to_seconds(datetime.time(4, 0)), 14400)
+
+
+# ---------------------------------------------------------------------------
+# Tests — async_fast_charge_discharge
+# ---------------------------------------------------------------------------
+
+class TestHanchuFastChargeDischarge(unittest.IsolatedAsyncioTestCase):
+
+    async def test_fast_charge_posts_to_correct_url(self) -> None:
+        """POST must target FAST_CHARGE_DISCHARGE_URL."""
+        from custom_components.hanchu_ess.const import FAST_CHARGE_DISCHARGE_URL
+
+        coord = _make_settings_coordinator()
+        session, _ = _make_session(payload={"code": 200, "data": {}})
+
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
+            await coord.async_fast_charge_discharge("fast_charge", 15)
+
+        self.assertEqual(session.post.call_args.args[0], FAST_CHARGE_DISCHARGE_URL)
+
+    async def test_fast_charge_sets_act_2_and_duration_seconds(self) -> None:
+        """fast_charge uses act=2 and duration in seconds."""
+        from custom_components.hanchu_ess.const import AES_IV, AES_SECRET_KEY
+        from custom_components.hanchu_ess.coordinator import _decrypt_payload
+
+        coord = _make_settings_coordinator(sn="TEST_SN")
+        session, _ = _make_session(payload={"code": 200, "data": {}})
+
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
+            await coord.async_fast_charge_discharge("fast_charge", 15)
+
+        body = session.post.call_args.kwargs["data"]
+        payload = _decrypt_payload(body, AES_SECRET_KEY, AES_IV)
+        self.assertEqual(payload["act"], 2)
+        self.assertEqual(payload["duration"], 900)  # 15 * 60
+        self.assertEqual(payload["sn"], "TEST_SN")
+
+    async def test_fast_discharge_sets_act_3(self) -> None:
+        """fast_discharge uses act=3."""
+        from custom_components.hanchu_ess.const import AES_IV, AES_SECRET_KEY
+        from custom_components.hanchu_ess.coordinator import _decrypt_payload
+
+        coord = _make_settings_coordinator()
+        session, _ = _make_session(payload={"code": 200, "data": {}})
+
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
+            await coord.async_fast_charge_discharge("fast_discharge", 30)
+
+        body = session.post.call_args.kwargs["data"]
+        payload = _decrypt_payload(body, AES_SECRET_KEY, AES_IV)
+        self.assertEqual(payload["act"], 3)
+        self.assertEqual(payload["duration"], 1800)  # 30 * 60
+
+    async def test_stop_charge_sets_act_minus2_no_duration(self) -> None:
+        """stop_charge uses act='-2' and omits duration."""
+        from custom_components.hanchu_ess.const import AES_IV, AES_SECRET_KEY
+        from custom_components.hanchu_ess.coordinator import _decrypt_payload
+
+        coord = _make_settings_coordinator()
+        session, _ = _make_session(payload={"code": 200, "data": {}})
+
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
+            await coord.async_fast_charge_discharge("stop_charge", None)
+
+        body = session.post.call_args.kwargs["data"]
+        payload = _decrypt_payload(body, AES_SECRET_KEY, AES_IV)
+        self.assertEqual(payload["act"], "-2")
+        self.assertNotIn("duration", payload)
+
+    async def test_stop_discharge_sets_act_minus3_no_duration(self) -> None:
+        """stop_discharge uses act='-3' and omits duration."""
+        from custom_components.hanchu_ess.const import AES_IV, AES_SECRET_KEY
+        from custom_components.hanchu_ess.coordinator import _decrypt_payload
+
+        coord = _make_settings_coordinator()
+        session, _ = _make_session(payload={"code": 200, "data": {}})
+
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
+            await coord.async_fast_charge_discharge("stop_discharge", None)
+
+        body = session.post.call_args.kwargs["data"]
+        payload = _decrypt_payload(body, AES_SECRET_KEY, AES_IV)
+        self.assertEqual(payload["act"], "-3")
+        self.assertNotIn("duration", payload)
+
+    async def test_no_token_raises_update_failed(self) -> None:
+        """Raises UpdateFailed immediately when there is no auth token."""
+        from homeassistant.helpers.update_coordinator import UpdateFailed
+
+        coord = _make_settings_coordinator(token=None)
+        with self.assertRaises(UpdateFailed):
+            await coord.async_fast_charge_discharge("fast_charge", 10)
+
+    async def test_http_401_raises_auth_failed(self) -> None:
+        """HTTP 401 triggers re-auth."""
+        from homeassistant.exceptions import ConfigEntryAuthFailed
+
+        coord = _make_settings_coordinator()
+        session, _ = _make_session(status=401, payload={})
+
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
+            with self.assertRaises(ConfigEntryAuthFailed):
+                await coord.async_fast_charge_discharge("fast_charge", 10)
+
+    async def test_api_error_code_raises_update_failed(self) -> None:
+        """Non-success API code raises UpdateFailed."""
+        from homeassistant.helpers.update_coordinator import UpdateFailed
+
+        coord = _make_settings_coordinator()
+        session, _ = _make_session(payload={"code": 500, "msg": "device error"})
+
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
+            with self.assertRaises(UpdateFailed):
+                await coord.async_fast_charge_discharge("fast_charge", 10)
+
+    async def test_network_error_raises_update_failed(self) -> None:
+        """Transport-level error is wrapped in UpdateFailed."""
+        import aiohttp
+        from homeassistant.helpers.update_coordinator import UpdateFailed
+
+        coord = _make_settings_coordinator()
+        cm = AsyncMock()
+        cm.__aenter__ = AsyncMock(side_effect=aiohttp.ClientConnectionError("refused"))
+        cm.__aexit__ = AsyncMock(return_value=False)
+        session = MagicMock()
+        session.post = MagicMock(return_value=cm)
+
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
+            with self.assertRaises(UpdateFailed):
+                await coord.async_fast_charge_discharge("fast_charge", 10)
 
 
 if __name__ == "__main__":

@@ -30,6 +30,7 @@ from .const import (
     DATA_POLL_MINUTES,
     DATA_URL,
     DOMAIN,
+    FAST_CHARGE_DISCHARGE_URL,
     IOT_GET_URL,
     IOT_SET_URL,
     IOT_SETTINGS_KEYS,
@@ -434,3 +435,46 @@ class HanchuSettingsCoordinator(DataUpdateCoordinator[dict]):
         _LOGGER.debug("Hanchu ESS settings written: %s", list(values.keys()))
         self._pending = {}
         await self.async_refresh()
+
+    async def async_fast_charge_discharge(self, mode: str, duration_minutes: int | None) -> None:
+        """POST a fast-charge/discharge command to the gateway.
+
+        mode: fast_charge | fast_discharge | stop_charge | stop_discharge
+        duration_minutes: required for start modes, ignored for stop modes.
+        """
+        token = self._auth.access_token
+        if not token:
+            raise UpdateFailed("No auth token available — cannot send command")
+
+        act_map = {
+            "fast_charge":    2,
+            "fast_discharge": 3,
+            "stop_charge":    "-2",
+            "stop_discharge": "-3",
+        }
+        payload: dict = {"sn": self._entry.data[CONF_SN], "act": act_map[mode]}
+        if mode in ("fast_charge", "fast_discharge"):
+            payload["duration"] = (duration_minutes or 0) * 60
+
+        encrypted_body = _encrypt_payload(payload, AES_SECRET_KEY, AES_IV)
+        session = async_get_clientsession(self.hass)
+        try:
+            async with session.post(
+                FAST_CHARGE_DISCHARGE_URL,
+                data=encrypted_body,
+                headers={**_BASE_HEADERS, "Access-Token": token},
+                timeout=aiohttp.ClientTimeout(total=30),
+            ) as response:
+                if response.status == 401:
+                    raise ConfigEntryAuthFailed("Hanchu ESS token expired — re-authenticating")
+                response.raise_for_status()
+                result: dict = await response.json(content_type=None)
+        except aiohttp.ClientError as err:
+            raise UpdateFailed(f"Network error sending fast charge/discharge: {err}") from err
+
+        if result.get("code") not in (200, 20001):
+            raise UpdateFailed(
+                f"Hanchu ESS fast charge/discharge error (code={result.get('code')}): "
+                f"{result.get('msg') or result.get('message', 'unknown error')}"
+            )
+        _LOGGER.debug("Hanchu ESS fast charge/discharge sent: mode=%s", mode)

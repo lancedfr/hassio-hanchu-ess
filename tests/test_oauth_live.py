@@ -35,8 +35,8 @@ class TestOAuthLiveEndpoint(unittest.IsolatedAsyncioTestCase):
 
     async def test_fetch_oauth_token_live(self) -> None:
         """POST encrypted credentials and assert a JWT token is returned."""
-        from custom_components.hanchu.const import AES_IV, AES_SECRET_KEY, AUTH_URL  # noqa: PLC0415
-        from custom_components.hanchu.coordinator import (  # noqa: PLC0415
+        from custom_components.hanchu_ess.const import AES_IV, AES_SECRET_KEY, AUTH_URL  # noqa: PLC0415
+        from custom_components.hanchu_ess.coordinator import (  # noqa: PLC0415
             _encrypt_payload,
             _rsa_encode_pwd,
         )

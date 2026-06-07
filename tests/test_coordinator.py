@@ -20,7 +20,7 @@ if str(_ROOT) not in sys.path:
 
 def _make_coordinator(account: str = "user@example.com", password: str = "s3cr3t"):
     """Return a HanchuAuthCoordinator with HA internals stubbed out."""
-    from custom_components.hanchu.coordinator import HanchuAuthCoordinator
+    from custom_components.hanchu_ess.coordinator import HanchuAuthCoordinator
 
     hass = MagicMock()
     entry = MagicMock()
@@ -70,7 +70,7 @@ class TestAsyncUpdateData(unittest.IsolatedAsyncioTestCase):
         coord = _make_coordinator()
         session, _ = _make_session(payload={"code": 200, "data": "a.b.c"})
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             result = await coord._async_update_data()
 
         self.assertEqual(result, {"token": "a.b.c"})
@@ -83,7 +83,7 @@ class TestAsyncUpdateData(unittest.IsolatedAsyncioTestCase):
         coord = _make_coordinator()
         session, _ = _make_session(payload={"code": 20001, "data": "tok"})
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             result = await coord._async_update_data()
 
         self.assertEqual(result["token"], "tok")
@@ -92,12 +92,12 @@ class TestAsyncUpdateData(unittest.IsolatedAsyncioTestCase):
 
     async def test_request_url(self) -> None:
         """POST must target the gateway login endpoint."""
-        from custom_components.hanchu.const import AUTH_URL
+        from custom_components.hanchu_ess.const import AUTH_URL
 
         coord = _make_coordinator()
         session, _ = _make_session()
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             await coord._async_update_data()
 
         url = session.post.call_args.args[0]
@@ -108,7 +108,7 @@ class TestAsyncUpdateData(unittest.IsolatedAsyncioTestCase):
         coord = _make_coordinator()
         session, _ = _make_session()
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             await coord._async_update_data()
 
         headers = session.post.call_args.kwargs["headers"]
@@ -123,12 +123,12 @@ class TestAsyncUpdateData(unittest.IsolatedAsyncioTestCase):
         from cryptography.hazmat.primitives import padding as sym_padding
         from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
-        from custom_components.hanchu.const import AES_IV, AES_SECRET_KEY
+        from custom_components.hanchu_ess.const import AES_IV, AES_SECRET_KEY
 
         coord = _make_coordinator(account="user@example.com", password="s3cr3t")
         session, _ = _make_session()
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             await coord._async_update_data()
 
         encrypted_b64: str = session.post.call_args.kwargs["data"]
@@ -155,7 +155,7 @@ class TestAsyncUpdateData(unittest.IsolatedAsyncioTestCase):
         coord = _make_coordinator()
         session, _ = _make_session(payload={"code": 400, "msg": "wrong password"})
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             with self.assertRaises(ConfigEntryAuthFailed):
                 await coord._async_update_data()
 
@@ -166,7 +166,7 @@ class TestAsyncUpdateData(unittest.IsolatedAsyncioTestCase):
         coord = _make_coordinator()
         session, _ = _make_session(payload={"code": 200, "data": ""})
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             with self.assertRaises(UpdateFailed):
                 await coord._async_update_data()
 
@@ -177,7 +177,7 @@ class TestAsyncUpdateData(unittest.IsolatedAsyncioTestCase):
         coord = _make_coordinator()
         session, _ = _make_session(status=401, payload={})
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             with self.assertRaises(ConfigEntryAuthFailed):
                 await coord._async_update_data()
 
@@ -193,7 +193,7 @@ class TestAsyncUpdateData(unittest.IsolatedAsyncioTestCase):
         session = MagicMock()
         session.post = MagicMock(return_value=cm)
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             with self.assertRaises(UpdateFailed):
                 await coord._async_update_data()
 
@@ -208,7 +208,7 @@ if __name__ == "__main__":
 
 def _make_data_coordinator(token: str | None = "test.jwt.token", sn: str = "TEST_SN"):
     """Return a HanchuDataCoordinator with HA internals and auth stubbed out."""
-    from custom_components.hanchu.coordinator import HanchuDataCoordinator
+    from custom_components.hanchu_ess.coordinator import HanchuDataCoordinator
 
     hass = MagicMock()
     entry = MagicMock()
@@ -271,7 +271,7 @@ class TestHanchuDataCoordinator(unittest.IsolatedAsyncioTestCase):
         coord = _make_data_coordinator()
         session, _ = _data_session(payload={"code": 200, "data": records})
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             result = await coord._async_update_data()
 
         self.assertEqual(result["load"],       1000.0)
@@ -289,7 +289,7 @@ class TestHanchuDataCoordinator(unittest.IsolatedAsyncioTestCase):
         coord = _make_data_coordinator()
         session, _ = _data_session(payload={"code": 20001, "data": records})
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             result = await coord._async_update_data()
 
         self.assertIn("load", result)
@@ -302,7 +302,7 @@ class TestHanchuDataCoordinator(unittest.IsolatedAsyncioTestCase):
         coord = _make_data_coordinator()
         session, _ = _data_session(payload={"code": 200, "data": records})
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             result = await coord._async_update_data()
 
         self.assertEqual(result["load"], 0.0)
@@ -314,12 +314,12 @@ class TestHanchuDataCoordinator(unittest.IsolatedAsyncioTestCase):
         """POST must target the energy statistics endpoint, not the auth URL."""
         from datetime import datetime
 
-        from custom_components.hanchu.const import DATA_URL
+        from custom_components.hanchu_ess.const import DATA_URL
 
         coord = _make_data_coordinator()
         session, _ = _data_session(payload={"code": 200, "data": [_year_record(datetime.now().year)]})
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             await coord._async_update_data()
 
         self.assertEqual(session.post.call_args.args[0], DATA_URL)
@@ -331,7 +331,7 @@ class TestHanchuDataCoordinator(unittest.IsolatedAsyncioTestCase):
         coord = _make_data_coordinator(token="my.secret.token")
         session, _ = _data_session(payload={"code": 200, "data": [_year_record(datetime.now().year)]})
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             await coord._async_update_data()
 
         headers = session.post.call_args.kwargs["headers"]
@@ -347,12 +347,12 @@ class TestHanchuDataCoordinator(unittest.IsolatedAsyncioTestCase):
         from cryptography.hazmat.primitives import padding as sym_padding
         from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
-        from custom_components.hanchu.const import AES_IV, AES_SECRET_KEY
+        from custom_components.hanchu_ess.const import AES_IV, AES_SECRET_KEY
 
         coord = _make_data_coordinator(sn="TEST_SN")
         session, _ = _data_session(payload={"code": 200, "data": [_year_record(datetime.now().year)]})
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             await coord._async_update_data()
 
         encrypted_b64: str = session.post.call_args.kwargs["data"]
@@ -385,7 +385,7 @@ class TestHanchuDataCoordinator(unittest.IsolatedAsyncioTestCase):
         coord = _make_data_coordinator()
         session, _ = _data_session(payload={"code": 500, "msg": "server error"})
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             with self.assertRaises(UpdateFailed):
                 await coord._async_update_data()
 
@@ -396,7 +396,7 @@ class TestHanchuDataCoordinator(unittest.IsolatedAsyncioTestCase):
         coord = _make_data_coordinator()
         session, _ = _data_session(status=401, payload={})
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             with self.assertRaises(ConfigEntryAuthFailed):
                 await coord._async_update_data()
 
@@ -407,7 +407,7 @@ class TestHanchuDataCoordinator(unittest.IsolatedAsyncioTestCase):
         coord = _make_data_coordinator()
         session, _ = _data_session(payload={"code": 200, "data": [_year_record(1999)]})
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             with self.assertRaises(UpdateFailed):
                 await coord._async_update_data()
 
@@ -423,7 +423,7 @@ class TestHanchuDataCoordinator(unittest.IsolatedAsyncioTestCase):
         session = MagicMock()
         session.post = MagicMock(return_value=cm)
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             with self.assertRaises(UpdateFailed):
                 await coord._async_update_data()
 
@@ -434,7 +434,7 @@ class TestHanchuDataCoordinator(unittest.IsolatedAsyncioTestCase):
 
 def _make_power_coordinator(token: str | None = "test.jwt.token", sn: str = "TEST_SN"):
     """Return a HanchuPowerCoordinator with HA internals and auth stubbed out."""
-    from custom_components.hanchu.coordinator import HanchuPowerCoordinator
+    from custom_components.hanchu_ess.coordinator import HanchuPowerCoordinator
 
     hass = MagicMock()
     entry = MagicMock()
@@ -495,7 +495,7 @@ class TestHanchuPowerCoordinator(unittest.IsolatedAsyncioTestCase):
         coord = _make_power_coordinator()
         session, _ = _power_session(payload=_power_payload("0.740"))
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             result = await coord._async_update_data()
 
         self.assertEqual(result["battery_soc"], 74.0)
@@ -505,7 +505,7 @@ class TestHanchuPowerCoordinator(unittest.IsolatedAsyncioTestCase):
         coord = _make_power_coordinator()
         session, _ = _power_session(payload=_power_payload("0.8333"))
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             result = await coord._async_update_data()
 
         self.assertAlmostEqual(result["battery_soc"], 83.3, places=1)
@@ -515,7 +515,7 @@ class TestHanchuPowerCoordinator(unittest.IsolatedAsyncioTestCase):
         coord = _make_power_coordinator()
         session, _ = _power_session(payload=_power_payload("1.0"))
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             result = await coord._async_update_data()
 
         self.assertEqual(result["battery_soc"], 100.0)
@@ -526,7 +526,7 @@ class TestHanchuPowerCoordinator(unittest.IsolatedAsyncioTestCase):
         payload = {"code": 20001, "data": {"batSoc": "0.5"}}
         session, _ = _power_session(payload=payload)
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             result = await coord._async_update_data()
 
         self.assertEqual(result["battery_soc"], 50.0)
@@ -535,12 +535,12 @@ class TestHanchuPowerCoordinator(unittest.IsolatedAsyncioTestCase):
 
     async def test_request_targets_power_url(self) -> None:
         """POST must target the powerChart endpoint."""
-        from custom_components.hanchu.const import POWER_URL
+        from custom_components.hanchu_ess.const import POWER_URL
 
         coord = _make_power_coordinator()
         session, _ = _power_session()
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             await coord._async_update_data()
 
         self.assertEqual(session.post.call_args.args[0], POWER_URL)
@@ -550,7 +550,7 @@ class TestHanchuPowerCoordinator(unittest.IsolatedAsyncioTestCase):
         coord = _make_power_coordinator(token="power.secret.token")
         session, _ = _power_session()
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             await coord._async_update_data()
 
         headers = session.post.call_args.kwargs["headers"]
@@ -564,12 +564,12 @@ class TestHanchuPowerCoordinator(unittest.IsolatedAsyncioTestCase):
         from cryptography.hazmat.primitives import padding as sym_padding
         from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
-        from custom_components.hanchu.const import AES_IV, AES_SECRET_KEY
+        from custom_components.hanchu_ess.const import AES_IV, AES_SECRET_KEY
 
         coord = _make_power_coordinator(sn="TEST_SN")
         session, _ = _power_session()
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             await coord._async_update_data()
 
         encrypted_b64: str = session.post.call_args.kwargs["data"]
@@ -601,7 +601,7 @@ class TestHanchuPowerCoordinator(unittest.IsolatedAsyncioTestCase):
         payload = {"code": 200, "data": {"sn": "H01XE244K0139"}}
         session, _ = _power_session(payload=payload)
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             with self.assertRaises(UpdateFailed):
                 await coord._async_update_data()
 
@@ -612,7 +612,7 @@ class TestHanchuPowerCoordinator(unittest.IsolatedAsyncioTestCase):
         coord = _make_power_coordinator()
         session, _ = _power_session(payload={"code": 500, "msg": "server error"})
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             with self.assertRaises(UpdateFailed):
                 await coord._async_update_data()
 
@@ -623,7 +623,7 @@ class TestHanchuPowerCoordinator(unittest.IsolatedAsyncioTestCase):
         coord = _make_power_coordinator()
         session, _ = _power_session(status=401, payload={})
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             with self.assertRaises(ConfigEntryAuthFailed):
                 await coord._async_update_data()
 
@@ -639,7 +639,7 @@ class TestHanchuPowerCoordinator(unittest.IsolatedAsyncioTestCase):
         session = MagicMock()
         session.post = MagicMock(return_value=cm)
 
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             with self.assertRaises(UpdateFailed):
                 await coord._async_update_data()
 
@@ -653,7 +653,7 @@ class TestHanchuPowerCoordinatorLivePowerFields(unittest.IsolatedAsyncioTestCase
     async def _fetch(self, payload: dict) -> dict:
         coord = _make_power_coordinator()
         session, _ = _make_session(payload=payload)
-        with patch("custom_components.hanchu.coordinator.async_get_clientsession", return_value=session):
+        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             return await coord._async_update_data()
 
     # ── solar ────────────────────────────────────────────────────────────

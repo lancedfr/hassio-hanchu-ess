@@ -128,6 +128,38 @@ Two button entities appear on the Hanchu ESS device page in Home Assistant:
 Changes made to the work mode, numeric, or time period entities are **staged locally** and are not sent to the device until you press **Write Settings**. Only fields that were actually changed are written, avoiding unnecessary `iotSet` calls and respecting the API rate limit.
 
 ![settings.png](settings.png)
+
+---
+
+## Services
+
+### `hanchu_ess.fast_charge_discharge`
+
+Imperatively starts or stops a fast charge or discharge cycle on the battery.
+Available from **Developer Tools → Services**, automations, and scripts.
+
+> **Safety note:** To ensure optimal performance and safety, please do not change any control settings or perform OTA updates during fast charging or discharging.
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| **mode** | Yes | `fast_charge` — start charging at maximum rate<br>`fast_discharge` — start discharging at maximum rate<br>`stop_charge` — cancel an active fast charge<br>`stop_discharge` — cancel an active fast discharge |
+| **duration** | For start modes only | How long to run the cycle, in whole minutes (1–1440). Ignored for stop modes. |
+
+**Example — start a 15-minute fast charge:**
+```yaml
+service: hanchu_ess.fast_charge_discharge
+data:
+  mode: fast_charge
+  duration: 15
+```
+
+**Example — stop fast charge:**
+```yaml
+service: hanchu_ess.fast_charge_discharge
+data:
+  mode: stop_charge
+```
+
 ---
 
 ## What is included
@@ -143,6 +175,7 @@ Changes made to the work mode, numeric, or time period entities are **staged loc
 - **6 number entities** — power (0–5000 W) and SOC limits (0–100 %, whole numbers only) (Configuration category)
 - **4 time entities** — charge/discharge period 1 boundaries (Configuration category)
 - **2 button entities** — **Read Settings** (fetches via `iotGet`) and **Write Settings** (sends only changed values via `iotSet`)
+- **1 service** — `hanchu_ess.fast_charge_discharge` (fast charge / discharge control)
 - Re-authentication flow — credentials can be updated via the UI without removing the entry
 - AES-CBC payload encryption and RSA password encryption matching the official Hanchu ESS app protocol
 - CI, linting, and unit tests
@@ -172,6 +205,7 @@ tests/
   test_oauth_live.py              Live OAuth login test (real endpoint)
   test_data_live.py               Live energy statistics test (real endpoint)
   test_power_live.py              Live power data test (real endpoint)
+  test_fast_charge_live.py        Live fast charge / discharge test (real endpoint)
 
 scripts/scaffold_check.py   Tiny local structure checker
 .github/workflows/ci.yml    CI for lint + tests
@@ -193,7 +227,7 @@ $env:HANCHU_TEST_ACCOUNT = "your@email.com"
 $env:HANCHU_TEST_PWD     = "yourpassword"
 $env:HANCHU_TEST_SN      = "yourserialnum"
 
-python -m pytest tests/test_oauth_live.py tests/test_data_live.py tests/test_power_live.py -v
+python -m pytest tests/test_oauth_live.py tests/test_data_live.py tests/test_power_live.py tests/test_fast_charge_live.py -v
 ```
 
 `test_decrypt.py` also doubles as a CLI decrypt tool:

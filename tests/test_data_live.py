@@ -35,13 +35,13 @@ class TestEnergyStatisticsLive(unittest.IsolatedAsyncioTestCase):
     """Authenticate against the real API, then pull yearly energy statistics."""
 
     async def test_fetch_energy_statistics(self) -> None:
-        from custom_components.hanchu.const import (  # noqa: PLC0415
+        from custom_components.hanchu_ess.const import (  # noqa: PLC0415
             AES_IV,
             AES_SECRET_KEY,
             AUTH_URL,
             DATA_URL,
         )
-        from custom_components.hanchu.coordinator import (  # noqa: PLC0415
+        from custom_components.hanchu_ess.coordinator import (  # noqa: PLC0415
             _encrypt_payload,
             _rsa_encode_pwd,
         )

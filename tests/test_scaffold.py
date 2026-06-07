@@ -17,7 +17,7 @@ class TestScaffold(unittest.TestCase):
         self.root = Path(__file__).resolve().parents[1]
 
     def test_manifest_has_rich_fields(self) -> None:
-        manifest_path = self.root / "custom_components" / "hanchu" / "manifest.json"
+        manifest_path = self.root / "custom_components" / "hanchu_ess" / "manifest.json"
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
 
         for key in (
@@ -86,7 +86,7 @@ class TestAuthConstants(unittest.TestCase):
 
     def test_const_has_auth_fields(self) -> None:
         """Ensure const.py exports all required auth symbols."""
-        const = importlib.import_module("custom_components.hanchu.const")
+        const = importlib.import_module("custom_components.hanchu_ess.const")
         for attr in (
             "AUTH_URL",
             "AES_IV",
@@ -108,7 +108,7 @@ class TestAuthConstants(unittest.TestCase):
 
     def test_encrypt_payload_returns_base64(self) -> None:
         """_encrypt_payload should return a valid Base64 string."""
-        from custom_components.hanchu.coordinator import _encrypt_payload  # noqa: PLC0415
+        from custom_components.hanchu_ess.coordinator import _encrypt_payload  # noqa: PLC0415
 
         key = b"TestKey123456789"  # 16 bytes
         iv = b"9z64Qr8mZH7Pg8d1"  # 16 bytes
@@ -120,7 +120,7 @@ class TestAuthConstants(unittest.TestCase):
 
     def test_rsa_encode_pwd_matches_java_shape(self) -> None:
         """RSA helper should return Base64 data for a 1024-bit PKCS#1 v1.5 encrypt."""
-        from custom_components.hanchu.coordinator import _rsa_encode_pwd  # noqa: PLC0415
+        from custom_components.hanchu_ess.coordinator import _rsa_encode_pwd  # noqa: PLC0415
 
         encoded = _rsa_encode_pwd("plain-password")
         self.assertIsInstance(encoded, str)
@@ -131,7 +131,7 @@ class TestAuthConstants(unittest.TestCase):
         self.assertEqual(len(raw), 128)
 
     def test_manifest_iot_class_is_cloud_polling(self) -> None:
-        manifest_path = self.root / "custom_components" / "hanchu" / "manifest.json"
+        manifest_path = self.root / "custom_components" / "hanchu_ess" / "manifest.json"
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         self.assertEqual(manifest["iot_class"], "cloud_polling")
 

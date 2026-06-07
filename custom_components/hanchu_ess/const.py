@@ -17,6 +17,7 @@ DATA_URL = "https://iess3.hanchuess.com/gateway/platform/pcs/historyStaticsChart
 POWER_URL = "https://iess3.hanchuess.com/gateway/platform/pcs/powerChart"
 IOT_GET_URL = "https://iess3.hanchuess.com/gateway/platform/deviceNew/iotGet"
 IOT_SET_URL = "https://iess3.hanchuess.com/gateway/platform/deviceNew/iotSet"
+FAST_CHARGE_DISCHARGE_URL = "https://iess3.hanchuess.com/gateway/platform/remoteContrDtu/fastChargeDischarge"
 DATA_POLL_MINUTES: int = 30
 POWER_POLL_MINUTES: int = 10
 DATA_DEV_TYPE: str = "2"

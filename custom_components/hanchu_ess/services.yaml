@@ -1,0 +1,34 @@
+fast_charge_discharge:
+  name: Fast Charge / Discharge
+  description: >
+    Start or stop a fast charge or discharge cycle on the Hanchu ESS battery.
+    To ensure optimal performance and safety, please do not change any control
+    settings or perform OTA updates during fast charging or discharging.
+  fields:
+    mode:
+      name: Mode
+      description: >
+        fast_charge — start charging at maximum rate.
+        fast_discharge — start discharging at maximum rate.
+        stop_charge — cancel an active fast charge.
+        stop_discharge — cancel an active fast discharge.
+      required: true
+      selector:
+        select:
+          options:
+            - fast_charge
+            - fast_discharge
+            - stop_charge
+            - stop_discharge
+    duration:
+      name: Duration (minutes)
+      description: >
+        How long to run the cycle, in whole minutes (minimum 1).
+        Required for fast_charge and fast_discharge; ignored for stop modes.
+      required: false
+      selector:
+        number:
+          min: 1
+          max: 1440
+          step: 1
+          unit_of_measurement: min

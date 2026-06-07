@@ -10,8 +10,8 @@ _ROOT = Path(__file__).resolve().parents[1]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from custom_components.hanchu.const import AES_IV, AES_SECRET_KEY  # noqa: E402
-from custom_components.hanchu.coordinator import _decrypt_payload, _encrypt_payload  # noqa: E402
+from custom_components.hanchu_ess.const import AES_IV, AES_SECRET_KEY  # noqa: E402
+from custom_components.hanchu_ess.coordinator import _decrypt_payload, _encrypt_payload  # noqa: E402
 
 
 class TestDecryptPayload(unittest.TestCase):

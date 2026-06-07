@@ -18,7 +18,7 @@ try:
 except ImportError:
     _HA_TEST_FRAMEWORK = False
 
-from custom_components.hanchu.const import DOMAIN
+from custom_components.hanchu_ess.const import DOMAIN
 
 
 @pytest.fixture
@@ -48,22 +48,22 @@ def mock_coordinators(mock_auth_token):
     """Patch all four API coordinators so no live network calls are made."""
     with (
         patch(
-            "custom_components.hanchu.coordinator.HanchuAuthCoordinator._async_update_data",
+            "custom_components.hanchu_ess.coordinator.HanchuAuthCoordinator._async_update_data",
             new_callable=AsyncMock,
             return_value=mock_auth_token,
         ),
         patch(
-            "custom_components.hanchu.coordinator.HanchuDataCoordinator._async_update_data",
+            "custom_components.hanchu_ess.coordinator.HanchuDataCoordinator._async_update_data",
             new_callable=AsyncMock,
             return_value={},
         ),
         patch(
-            "custom_components.hanchu.coordinator.HanchuPowerCoordinator._async_update_data",
+            "custom_components.hanchu_ess.coordinator.HanchuPowerCoordinator._async_update_data",
             new_callable=AsyncMock,
             return_value={},
         ),
         patch(
-            "custom_components.hanchu.coordinator.HanchuSettingsCoordinator._async_update_data",
+            "custom_components.hanchu_ess.coordinator.HanchuSettingsCoordinator._async_update_data",
             new_callable=AsyncMock,
             return_value={},
         ),

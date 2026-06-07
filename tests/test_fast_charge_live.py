@@ -1,4 +1,4 @@
-"""Live integration test — authenticate then fetch battery state-of-charge."""
+"""Live integration test — authenticate then send fast charge / discharge commands."""
 
 from __future__ import annotations
 
@@ -30,15 +30,15 @@ _SKIP_REASON = "Set HANCHU_TEST_ACCOUNT, HANCHU_TEST_PWD, HANCHU_TEST_SN to run 
 
 
 @unittest.skipUnless(_CONF_ACCOUNT and _CONF_PWD and _CONF_SN, _SKIP_REASON)
-class TestPowerLive(unittest.IsolatedAsyncioTestCase):
-    """Authenticate against the real API, then pull live battery SOC."""
+class TestFastChargeLive(unittest.IsolatedAsyncioTestCase):
+    """Authenticate against the real API, then send a 1-minute fast charge and immediately stop it."""
 
-    async def test_fetch_battery_soc(self) -> None:
+    async def test_fast_charge_then_stop(self) -> None:
         from custom_components.hanchu_ess.const import (
             AES_IV,
             AES_SECRET_KEY,
             AUTH_URL,
-            POWER_URL,
+            FAST_CHARGE_DISCHARGE_URL,
         )
         from custom_components.hanchu_ess.coordinator import _encrypt_payload, _rsa_encode_pwd
 
@@ -74,34 +74,51 @@ class TestPowerLive(unittest.IsolatedAsyncioTestCase):
             token: str = auth_payload["data"]
             self.assertTrue(token, "Auth returned empty token")
 
-            # ── Step 2: fetch powerChart ──────────────────────────────────
-            power_body = _encrypt_payload({"sn": _CONF_SN}, AES_SECRET_KEY, AES_IV)
+            # ── Step 2: start fast charge for 1 minute ────────────────────
+            start_body = _encrypt_payload(
+                {"sn": _CONF_SN, "act": 2, "duration": 60},
+                AES_SECRET_KEY,
+                AES_IV,
+            )
 
             async with session.post(
-                POWER_URL,
-                data=power_body,
+                FAST_CHARGE_DISCHARGE_URL,
+                data=start_body,
                 headers={**_HEADERS, "Access-Token": token},
             ) as resp:
                 raw = await resp.text()
-                self.assertLess(resp.status, 500, f"Power server error: {raw[:200]}")
-                power_payload: dict = json.loads(raw)
+                self.assertLess(resp.status, 500, f"Fast charge start server error: {raw[:200]}")
+                start_result: dict = json.loads(raw)
 
-        self.assertIn(
-            power_payload.get("code"),
-            (200, 20001),
-            f"Power request failed: {power_payload}",
-        )
+            print(f"\n  Fast charge start response: {json.dumps(start_result, indent=4)}")
+            self.assertIn(
+                start_result.get("code"),
+                (200, 20001),
+                f"Fast charge start failed: {start_result}",
+            )
 
-        device: dict = power_payload.get("data") or {}
-        self.assertIn("batSoc", device, f"batSoc missing from response: {device}")
+            # ── Step 3: stop fast charge ──────────────────────────────────
+            stop_body = _encrypt_payload(
+                {"sn": _CONF_SN, "act": "-2"},
+                AES_SECRET_KEY,
+                AES_IV,
+            )
 
-        raw_soc = device["batSoc"]
-        battery_pct = round(float(raw_soc) * 100, 1)
-        self.assertGreaterEqual(battery_pct, 0.0)
-        self.assertLessEqual(battery_pct, 100.0)
+            async with session.post(
+                FAST_CHARGE_DISCHARGE_URL,
+                data=stop_body,
+                headers={**_HEADERS, "Access-Token": token},
+            ) as resp:
+                raw = await resp.text()
+                self.assertLess(resp.status, 500, f"Fast charge stop server error: {raw[:200]}")
+                stop_result: dict = json.loads(raw)
 
-        print(f"\n  Battery SOC (batSoc): {raw_soc} => {battery_pct}%")
-        print(f"\n  Full device record: {json.dumps(device, indent=4)}")
+            print(f"\n  Fast charge stop response: {json.dumps(stop_result, indent=4)}")
+            self.assertIn(
+                stop_result.get("code"),
+                (200, 20001),
+                f"Fast charge stop failed: {stop_result}",
+            )
 
 
 if __name__ == "__main__":

@@ -5,10 +5,12 @@ from __future__ import annotations
 import asyncio
 from dataclasses import dataclass
 
+import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, ServiceCall
 
+from .const import DOMAIN
 from .coordinator import (
     HanchuAuthCoordinator,
     HanchuDataCoordinator,
@@ -17,6 +19,9 @@ from .coordinator import (
 )
 
 PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.SELECT, Platform.NUMBER, Platform.TIME, Platform.BUTTON]
+
+SERVICE_FAST_CHARGE_DISCHARGE = "fast_charge_discharge"
+_MODE_OPTIONS = ["fast_charge", "fast_discharge", "stop_charge", "stop_discharge"]
 
 
 @dataclass
@@ -50,10 +55,26 @@ async def async_setup_entry(hass: HomeAssistant, entry: HanchuConfigEntry) -> bo
         settings_coordinator=settings_coordinator,
     )
 
+    async def _handle_fast_charge_discharge(call: ServiceCall) -> None:
+        mode: str = call.data["mode"]
+        duration: int | None = call.data.get("duration")
+        await entry.runtime_data.settings_coordinator.async_fast_charge_discharge(mode, duration)
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_FAST_CHARGE_DISCHARGE,
+        _handle_fast_charge_discharge,
+        schema=vol.Schema({
+            vol.Required("mode"): vol.In(_MODE_OPTIONS),
+            vol.Optional("duration"): vol.All(vol.Coerce(int), vol.Range(min=1)),
+        }),
+    )
+
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: HanchuConfigEntry) -> bool:
     """Unload a config entry."""
+    hass.services.async_remove(DOMAIN, SERVICE_FAST_CHARGE_DISCHARGE)
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)

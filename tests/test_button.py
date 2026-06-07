@@ -30,27 +30,27 @@ def _make_entry(entry_id: str = "test_entry_id", sn: str = "TEST_SN", name: str 
 
 
 def _make_read_button(coord=None, entry=None):
-    from custom_components.hanchu.button import HanchuReadSettingsButton
+    from custom_components.hanchu_ess.button import HanchuReadSettingsButton
 
     if coord is None:
         coord = _make_coordinator()
     if entry is None:
         entry = _make_entry()
 
-    with patch("custom_components.hanchu.button._device_info", return_value={}):
+    with patch("custom_components.hanchu_ess.button._device_info", return_value={}):
         btn = HanchuReadSettingsButton(coord, entry)
     return btn, coord
 
 
 def _make_write_button(coord=None, entry=None):
-    from custom_components.hanchu.button import HanchuWriteSettingsButton
+    from custom_components.hanchu_ess.button import HanchuWriteSettingsButton
 
     if coord is None:
         coord = _make_coordinator()
     if entry is None:
         entry = _make_entry()
 
-    with patch("custom_components.hanchu.button._device_info", return_value={}):
+    with patch("custom_components.hanchu_ess.button._device_info", return_value={}):
         btn = HanchuWriteSettingsButton(coord, entry)
     return btn, coord
 
