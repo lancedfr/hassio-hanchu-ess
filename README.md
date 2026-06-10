@@ -80,8 +80,6 @@ Polled every **600 seconds** (10 minutes by default, configurable) from the `pow
 |--------|-------------|
 | **Home Battery** | Live battery state-of-charge (0–100 %) |
 
-![sensors.png](sensors.png)
-
 ---
 
 ## Configuration entities
@@ -124,8 +122,6 @@ All configuration entities appear under the **Configuration** section of the Han
 
 Time values are stored as seconds-since-midnight by the PCS and displayed as HH:MM in Home Assistant.
 
-![configuration.png](configuration.png)
-
 ---
 
 ## Settings buttons
@@ -138,8 +134,6 @@ Two button entities appear on the Hanchu ESS device page in Home Assistant:
 | **Write Settings** | Sends only the settings you have changed to the device via `iotSet` |
 
 Changes made to the work mode, numeric, or time period entities are **staged locally** and are not sent to the device until you press **Write Settings**. Only fields that were actually changed are written, avoiding unnecessary `iotSet` calls and respecting the API rate limit.
-
-![settings.png](settings.png)
 
 ---
 
@@ -222,6 +216,53 @@ tests/
 scripts/scaffold_check.py   Tiny local structure checker
 .github/workflows/ci.yml    CI for lint + tests
 ```
+
+## Releasing a New Version
+
+All releases follow [Semantic Versioning](https://semver.org/). The version in
+`custom_components/hanchu_ess/manifest.json` is what HACS and Home Assistant read.
+
+### Steps
+
+1. **Bump the version** in `custom_components/hanchu_ess/manifest.json`:
+   ```json
+   "version": "0.2.0"
+   ```
+
+2. **Update `CHANGELOG.md`** — move the bullet points from `[Unreleased]` into a new
+   dated section immediately below it, then restore an empty `[Unreleased]` at the top:
+   ```markdown
+   ## [Unreleased]
+
+   ## [0.2.0] - YYYY-MM-DD
+
+   ### Added
+   - ...
+   ```
+   Update the comparison links at the bottom of the file:
+   ```markdown
+   [Unreleased]: https://github.com/lancedfr/hassio-hanchu-ess/compare/v0.2.0...HEAD
+   [0.2.0]: https://github.com/lancedfr/hassio-hanchu-ess/compare/v0.1.0...v0.2.0
+   ```
+
+3. **Commit and tag:**
+   ```bash
+   git add custom_components/hanchu_ess/manifest.json CHANGELOG.md
+   git commit -m "Release v0.2.0"
+   git tag v0.2.0
+   git push origin master
+   git push origin v0.2.0
+   ```
+
+4. **Verify** the GitHub Actions **Release** workflow completes — it extracts the
+   changelog section, builds `hanchu.zip`, and publishes a GitHub Release. HACS users
+   will then see the new version available for update automatically.
+
+> **Rule:** the tag (`v0.2.0`) must match the `version` field in `manifest.json`
+> (`0.2.0`) exactly. The `CHANGELOG.md` entry for that version must exist before you
+> push the tag, or the release workflow will fail.
+
+---
 
 ## Quick local checks
 
