@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass
+from datetime import timedelta
 
 import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry
@@ -39,6 +40,23 @@ class HanchuRuntimeData:
 
 
 type HanchuConfigEntry = ConfigEntry[HanchuRuntimeData]
+
+
+async def _async_update_poll_intervals(hass: HomeAssistant, entry: HanchuConfigEntry) -> None:
+    """Apply updated poll intervals to running coordinators without a reload."""
+    runtime = entry.runtime_data
+    data_poll = (
+        entry.options.get(CONF_DATA_POLL_SECONDS)
+        or entry.data.get(CONF_DATA_POLL_SECONDS)
+        or DATA_POLL_SECONDS
+    )
+    power_poll = (
+        entry.options.get(CONF_POWER_POLL_SECONDS)
+        or entry.data.get(CONF_POWER_POLL_SECONDS)
+        or POWER_POLL_SECONDS
+    )
+    runtime.data_coordinator.update_interval = timedelta(seconds=data_poll)
+    runtime.power_coordinator.update_interval = timedelta(seconds=power_poll)
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: HanchuConfigEntry) -> bool:
@@ -87,6 +105,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: HanchuConfigEntry) -> bo
     )
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    entry.async_on_unload(entry.add_update_listener(_async_update_poll_intervals))
     return True
 
 
