@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Release planning and changelog template based on Keep a Changelog.
+
 ## [0.1.0] - 2026-06-09
 
 ### Added
