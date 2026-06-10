@@ -32,7 +32,9 @@ jobs:
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
 
       - name: Build release zip
-        run: zip -r hanchu.zip custom_components/hanchu_ess/
+        run: |
+          cd custom_components/hanchu_ess
+          zip -r ../../hanchu.zip . --exclude "**/__pycache__/*" --exclude "**/*.pyc"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Release zip now contains integration files at the archive root (not nested under
+  `custom_components/hanchu_ess/`), and excludes compiled bytecode.
+
 ## [0.2.0] - 2026-06-10
 
 ### Added
