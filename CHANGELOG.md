@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-06-10
+
 ### Added
 
 - Release planning and changelog template based on Keep a Changelog.
@@ -48,5 +50,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   gateway rejects them.
 - HACS-ready repository structure with `hacs.json` and `manifest.json`.
 
-[Unreleased]: https://github.com/lancedfr/hassio-hanchu-ess/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/lancedfr/hassio-hanchu-ess/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/lancedfr/hassio-hanchu-ess/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/lancedfr/hassio-hanchu-ess/releases/tag/v0.1.0
