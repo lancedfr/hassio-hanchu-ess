@@ -51,14 +51,10 @@ _BASE_HEADERS: dict[str, str] = {
 
 def _rsa_encode_pwd(pwd: str) -> str:
     """Mirror Java rsaEncode: X509 key decode + RSA/ECB/PKCS1Padding + Base64."""
-    try:
-        decoded_key = base64.b64decode(RSA_PUBLIC_KEY_B64)
-        public_key = load_der_public_key(decoded_key)
-        encrypted = public_key.encrypt(pwd.encode("utf-8"), asym_padding.PKCS1v15())
-        return base64.b64encode(encrypted).decode("utf-8")
-    except Exception:  # noqa: BLE001
-        _LOGGER.exception("Failed to RSA-encrypt password")
-        return ""
+    decoded_key = base64.b64decode(RSA_PUBLIC_KEY_B64)
+    public_key = load_der_public_key(decoded_key)
+    encrypted = public_key.encrypt(pwd.encode("utf-8"), asym_padding.PKCS1v15())
+    return base64.b64encode(encrypted).decode("utf-8")
 
 def _encrypt_payload(data: dict, key: bytes, iv: bytes) -> str:
     """Serialize *data* to JSON and encrypt it with AES-CBC + PKCS7 padding.
@@ -115,9 +111,10 @@ class HanchuAuthCoordinator(DataUpdateCoordinator[dict]):
         """
         account: str = self._entry.data[CONF_ACCOUNT]
         pwd_plain: str = self._entry.data[CONF_PWD]
-        pwd_rsa: str = _rsa_encode_pwd(pwd_plain)
-        if not pwd_rsa:
-            raise UpdateFailed("Failed to RSA-encrypt password")
+        try:
+            pwd_rsa: str = _rsa_encode_pwd(pwd_plain)
+        except Exception as err:
+            raise UpdateFailed(f"Failed to RSA-encrypt password: {err}") from err
 
         encrypted_body = _encrypt_payload(
             {"account": account, "pwd": pwd_rsa},
@@ -243,7 +240,7 @@ class HanchuDataCoordinator(DataUpdateCoordinator[dict]):
 
 
 class HanchuPowerCoordinator(DataUpdateCoordinator[dict]):
-    """Poll the Hanchu powerChart endpoint every 5 minutes for live device state."""
+    """Poll the Hanchu powerChart endpoint every 10 minutes (default) for live device state."""
 
     def __init__(
         self,
@@ -342,7 +339,7 @@ class HanchuSettingsCoordinator(DataUpdateCoordinator[dict]):
 
         encrypted_body = _encrypt_payload(
             {
-                "devType": "2",
+                "devType": DATA_DEV_TYPE,
                 "sn": self._entry.data[CONF_SN],
                 "keys": IOT_SETTINGS_KEYS,
             },
@@ -403,7 +400,7 @@ class HanchuSettingsCoordinator(DataUpdateCoordinator[dict]):
 
         encrypted_body = _encrypt_payload(
             {
-                "devType": "2",
+                "devType": DATA_DEV_TYPE,
                 "sn": self._entry.data[CONF_SN],
                 "value": values,
             },
@@ -433,6 +430,11 @@ class HanchuSettingsCoordinator(DataUpdateCoordinator[dict]):
             )
 
         _LOGGER.debug("Hanchu ESS settings written: %s", list(values.keys()))
+        # Below needs to be tested -
+        # Fix `_pending` cleared before refresh in `async_set_settings` — `self._pending = {}`
+        # is reset before `await self.async_refresh()`. If the refresh fails, staged changes
+        # are silently lost. Move the clear to after a successful refresh
+        # (or restore on failure).
         self._pending = {}
         await self.async_refresh()
 
@@ -446,6 +448,7 @@ class HanchuSettingsCoordinator(DataUpdateCoordinator[dict]):
         if not token:
             raise UpdateFailed("No auth token available — cannot send command")
 
+        # The API distinguishes start modes (positive int) from stop modes (negative string).
         act_map = {
             "fast_charge":    2,
             "fast_discharge": 3,

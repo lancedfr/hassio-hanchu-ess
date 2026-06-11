@@ -41,3 +41,21 @@
 - [x] **`device_info` duplicated across sensor classes** — `HanchuEnergySensor` and `HanchuBatterySensor` both build an identical `device_info` dict inline. Extract to a module-level helper `_device_info(entry)` to avoid drift.
 
 - [x] **Magic request body values should be named constants** — `"devType": "2"` and `"maxCount": 1440` in `HanchuDataCoordinator._async_update_data` are unexplained magic values. Move them to `const.py` as `DATA_DEV_TYPE` and `DATA_MAX_COUNT`.
+
+- [x] **Fix `manifest.json` logger namespace** — `"loggers": ["custom_components.hanchu"]` is missing the `_ess` suffix. The actual logger is `custom_components.hanchu_ess.*`, so HA log-level overrides in `configuration.yaml` won't work. Change to `"custom_components.hanchu_ess"`.
+
+- [x] **Use `DATA_DEV_TYPE` constant in `HanchuSettingsCoordinator`** — `_async_update_data` and `async_set_settings` both hardcode `"devType": "2"` inline, whereas `HanchuDataCoordinator` correctly uses the `DATA_DEV_TYPE` constant. Replace both raw `"2"` references with the constant.
+
+- [x] **Fix "5 minutes" docstrings** — `HanchuPowerCoordinator` (coordinator.py) and `HanchuBatterySensor` (sensor.py) both say "every 5 minutes" but the default `POWER_POLL_SECONDS = 600` is 10 minutes. Update to "10 minutes (default)".
+
+- [x] **Fix `conftest.py` password key** — `mock_config_entry` fixture uses `"password": "test_password"` but the actual config key is `CONF_PWD = "pwd"`. Any test that exercises auth via this fixture silently gets `None` for the password. Change `"password"` → `"pwd"`.
+
+- [x] **Add `options` block to `strings.json`** — the `options.step.init` section is present in `translations/en.json` but missing from `strings.json`. HA uses `strings.json` as the canonical schema, so options flow fields have no labels. Add the matching block.
+
+- [x] **Sync `pyproject.toml` version with `manifest.json`** — `pyproject.toml` is at `0.1.0` while `manifest.json` is at `0.3.0`. They should stay in sync.
+
+- [x] **Use typed `DeviceInfo` in `_device_info()`** — `sensor.py`'s `_device_info()` returns a plain `dict`. Use `homeassistant.helpers.device_registry.DeviceInfo(...)` for type safety and HA static-analysis validation.
+
+- [x] **Improve `_rsa_encode_pwd` exception handling** — the bare `except Exception` logs and returns `""`, causing a generic `UpdateFailed` in the caller. Re-raise as `UpdateFailed` with exception chaining (`from err`) so the root cause is visible in logs.
+
+- [x] **Document mixed `int`/`str` in `act_map`** — `async_fast_charge_discharge` uses `int` for start modes (`2`, `3`) but `str` for stop modes (`"-2"`, `"-3"`). Add a comment explaining this is intentional per the API contract.

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Minor cosmetic changes after code review
+
 ### Fixed
 
 - Poll interval changes via **Configure** now take effect immediately without requiring a manual reload of the integration.

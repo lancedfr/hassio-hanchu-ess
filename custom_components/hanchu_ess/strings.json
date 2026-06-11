@@ -31,6 +31,20 @@
       "reauth_successful": "Re-authentication was successful."
     }
   },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Polling intervals",
+        "data": {
+          "data_poll_seconds": "Energy data poll interval (seconds)",
+          "power_poll_seconds": "Live power poll interval (seconds)"
+        }
+      }
+    },
+    "error": {
+      "poll_too_short": "Interval is too short (minimum 60 s for data, 30 s for power)."
+    }
+  },
   "entity": {
     "select": {
       "work_mode": {

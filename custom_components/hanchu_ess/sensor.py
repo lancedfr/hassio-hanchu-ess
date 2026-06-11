@@ -11,6 +11,7 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.const import CONF_NAME, PERCENTAGE, UnitOfEnergy, UnitOfPower
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -41,13 +42,13 @@ _POWER_SENSORS: list[tuple[str, str, str]] = [
 ]
 
 
-def _device_info(entry: HanchuConfigEntry) -> dict:
-    return {
-        "identifiers": {(DOMAIN, entry.data[CONF_SN])},
-        "name": entry.data.get(CONF_NAME, "Hanchu ESS"),
-        "manufacturer": "Hanchu",
-        "model": "PCS",
-    }
+def _device_info(entry: HanchuConfigEntry) -> DeviceInfo:
+    return DeviceInfo(
+        identifiers={(DOMAIN, entry.data[CONF_SN])},
+        name=entry.data.get(CONF_NAME, "Hanchu ESS"),
+        manufacturer="Hanchu",
+        model="PCS",
+    )
 
 
 async def async_setup_entry(
@@ -139,7 +140,7 @@ class HanchuLivePowerSensor(CoordinatorEntity[HanchuPowerCoordinator], SensorEnt
 
 
 class HanchuBatterySensor(CoordinatorEntity[HanchuPowerCoordinator], SensorEntity):
-    """Battery state-of-charge sensor, updated every 5 minutes."""
+    """Battery state-of-charge sensor, updated every 10 minutes (default)."""
 
     _attr_has_entity_name = True
     _attr_name = "Home Battery"

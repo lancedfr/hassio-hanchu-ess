@@ -30,7 +30,7 @@ def mock_config_entry():
         domain=DOMAIN,
         data={
             "account": "test@example.com",
-            "password": "test_password",
+            "pwd": "test_password",
             "sn": "TEST_SN_001",
             "name": "Hanchu",
         },

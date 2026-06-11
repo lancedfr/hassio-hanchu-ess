@@ -12,7 +12,7 @@
   "iot_class": "cloud_polling",
   "quality_scale": "bronze",
   "loggers": [
-    "custom_components.hanchu"
+    "custom_components.hanchu_ess"
   ],
   "single_config_entry": true,
   "requirements": [],
