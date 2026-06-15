@@ -96,11 +96,6 @@ class HanchuEnergySensor(CoordinatorEntity[HanchuDataCoordinator], SensorEntity)
         self._attr_device_info = _device_info(entry)
 
     @property
-    def last_reset(self) -> datetime:
-        """Return the start of the current year — values reset every January 1st."""
-        return datetime(datetime.now().year, 1, 1, tzinfo=UTC)
-
-    @property
     def native_value(self) -> float | None:
         """Return the current sensor value from coordinator data."""
         if self.coordinator.data is None:

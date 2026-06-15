@@ -1,0 +1,124 @@
+# Hanchu ESS — Settings Dashboard
+# Import into Home Assistant: Settings → Dashboards → Add Dashboard → raw YAML,
+# or paste the cards list into an existing view.
+#
+# Entity IDs assume the integration was added with the default name "Hanchu ESS".
+# If you used a different name, replace the "outside_hanchu_ess" prefix throughout.
+
+title: Hanchu ESS Settings
+views:
+  - title: Configuration
+    icon: mdi:cog
+    cards:
+      - type: logbook
+        state_filter: []
+        target:
+          entity_id:
+            - select.outside_hanchu_ess_work_mode
+            - time.outside_hanchu_ess_charge_period_1_start
+            - time.outside_hanchu_ess_charge_period_1_end
+            - time.outside_hanchu_ess_charge_period_2_start
+            - time.outside_hanchu_ess_charge_period_2_end
+            - time.outside_hanchu_ess_charge_period_3_start
+            - time.outside_hanchu_ess_charge_period_3_end
+            - time.outside_hanchu_ess_discharge_period_1_start
+            - time.outside_hanchu_ess_discharge_period_1_end
+            - time.outside_hanchu_ess_discharge_period_2_start
+            - time.outside_hanchu_ess_discharge_period_2_end
+            - time.outside_hanchu_ess_discharge_period_3_start
+            - time.outside_hanchu_ess_discharge_period_3_end
+            - number.outside_hanchu_ess_charging_power_maximum
+            - number.outside_hanchu_ess_discharge_power_maximum
+            - number.outside_hanchu_ess_grid_to_battery_charge_maximum
+            - number.outside_hanchu_ess_maximum_charge_soc
+            - number.outside_hanchu_ess_on_grid_battery_discharge_minimum
+            - number.outside_hanchu_ess_off_grid_battery_discharge_minimum
+      - type: entities
+        title: Apply Settings
+        entities:
+          - entity: button.outside_hanchu_ess_read_settings
+            tap_action:
+              confirmation: true
+              action: toggle
+          - entity: button.outside_hanchu_ess_write_settings
+            tap_action:
+              confirmation: true
+              action: toggle
+      - type: entities
+        title: Work Mode
+        entities:
+          - entity: select.outside_hanchu_ess_work_mode
+      - type: conditional
+        conditions:
+          - condition: state
+            entity: select.outside_hanchu_ess_work_mode
+            state: User-defined
+        card:
+          type: vertical-stack
+          cards:
+            - type: entities
+              title: Charge Schedule
+              entities:
+                - entity: time.outside_hanchu_ess_charge_period_1_start
+                  name:
+                    type: entity
+                - entity: time.outside_hanchu_ess_charge_period_1_end
+                  name:
+                    type: entity
+                - entity: time.outside_hanchu_ess_charge_period_2_start
+                  name:
+                    type: entity
+                - entity: time.outside_hanchu_ess_charge_period_2_end
+                  name:
+                    type: entity
+                - entity: time.outside_hanchu_ess_charge_period_3_start
+                  name:
+                    type: entity
+                - entity: time.outside_hanchu_ess_charge_period_3_end
+                  name:
+                    type: entity
+            - type: entities
+              title: Discharge Schedule
+              entities:
+                - entity: time.outside_hanchu_ess_discharge_period_1_start
+                  name:
+                    type: entity
+                - entity: time.outside_hanchu_ess_discharge_period_1_end
+                  name:
+                    type: entity
+                - entity: time.outside_hanchu_ess_discharge_period_2_start
+                  name:
+                    type: entity
+                - entity: time.outside_hanchu_ess_discharge_period_2_end
+                  name:
+                    type: entity
+                - entity: time.outside_hanchu_ess_discharge_period_3_start
+                  name:
+                    type: entity
+                - entity: time.outside_hanchu_ess_discharge_period_3_end
+                  name:
+                    type: entity
+            - type: entities
+              title: Power Limits
+              entities:
+                - entity: number.outside_hanchu_ess_charging_power_maximum
+                  name:
+                    type: entity
+                - entity: number.outside_hanchu_ess_discharge_power_maximum
+                  name:
+                    type: entity
+                - entity: number.outside_hanchu_ess_grid_to_battery_charge_maximum
+                  name:
+                    type: entity
+      - type: entities
+        title: Battery SOC Limits
+        entities:
+          - entity: number.outside_hanchu_ess_maximum_charge_soc
+            name:
+              type: entity
+          - entity: number.outside_hanchu_ess_on_grid_battery_discharge_minimum
+            name:
+              type: entity
+          - entity: number.outside_hanchu_ess_off_grid_battery_discharge_minimum
+            name:
+              type: entity
