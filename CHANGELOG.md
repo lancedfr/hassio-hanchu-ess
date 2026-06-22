@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Minor cosmetic changes after code review
-- Energy sensors now report **lifetime totals** (sum of all years) instead of the current calendar year only.
+- **Breaking:** Energy sensors now report **lifetime totals** (sum of all years) instead of the current calendar year only. This may result in energy dashboards or custom sensors spike in usage.
+- Energy totals are now monotonically increasing: if the API returns values that would reduce a lifetime total, the previously-observed higher value is kept.
 
 ### Fixed
 
