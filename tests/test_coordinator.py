@@ -410,28 +410,6 @@ class TestHanchuDataCoordinator(unittest.IsolatedAsyncioTestCase):
             with self.assertRaises(UpdateFailed):
                 await coord._async_update_data()
 
-    async def test_totals_never_decrease(self) -> None:
-        """If the API returns a lower sum than previously held, keep the higher values."""
-        from datetime import datetime
-
-        coord = _make_data_coordinator()
-        coord.data = {
-            "load": 5000.0, "generation": 4000.0, "charge": 1000.0,
-            "discharge": 900.0, "from_grid": 1500.0, "to_grid": 500.0,
-        }
-        records = [_year_record(datetime.now().year, loadEe=100.0)]
-        session, _ = _data_session(payload={"code": 200, "data": records})
-
-        with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
-            result = await coord._async_update_data()
-
-        self.assertEqual(result["load"],       5000.0)  # 100 < 5000 → clamped
-        self.assertEqual(result["generation"], 4000.0)  # 800 < 4000 → clamped
-        self.assertEqual(result["charge"],     1000.0)  # 200 < 1000 → clamped
-        self.assertEqual(result["discharge"],   900.0)  # 180 < 900  → clamped
-        self.assertEqual(result["from_grid"],  1500.0)  # 300 < 1500 → clamped
-        self.assertEqual(result["to_grid"],     500.0)  # 100 < 500  → clamped
-
     async def test_network_error_raises_update_failed(self) -> None:
         """A transport-level error is wrapped in UpdateFailed."""
         import aiohttp

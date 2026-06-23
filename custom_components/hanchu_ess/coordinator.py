@@ -238,9 +238,6 @@ class HanchuDataCoordinator(DataUpdateCoordinator[dict]):
             totals["discharge"]  += float(record.get("batTdDschg") or 0)
             totals["from_grid"]  += float(record.get("gridTdEe") or 0)
             totals["to_grid"]    += float(record.get("gridTdFe") or 0)
-        if self.data:
-            for key in totals:
-                totals[key] = max(totals[key], self.data.get(key, 0.0))
         return totals
 
 
