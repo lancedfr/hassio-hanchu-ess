@@ -1,4 +1,9 @@
-# Hanchu ESS Home Assistant Integration
+# ❗ Depreciation notice ❗
+This integration is going to be deprecated in favour of https://github.com/upton68/hanchu-ess-ha.
+
+Reason - this integration is the Hanchu website reverse engineered with encryption and not the easiest to enhance. The https://github.com/upton68/hanchu-ess-ha integration interfaces with endpoints designed by Hanchu for Home Assistant.
+
+## Hanchu ESS Home Assistant Integration
 
 `hanchu` is a custom Home Assistant integration for the Hanchu ESS PCS (Power Conversion System), prepared for HACS.
 
