@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1]
+
 ### Changed
 
 - ❗ Depreciation notice ❗ This integration is going to be deprecated in favour of https://github.com/upton68/hanchu-ess-ha. Reason - this integration is the Hanchu website reverse engineered with encryption and not the easiest to enhance. The https://github.com/upton68/hanchu-ess-ha integration interfaces with endpoints designed by Hanchu for Home Assistant.
@@ -67,6 +69,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - HACS-ready repository structure with `hacs.json` and `manifest.json`.
 
 [Unreleased]: https://github.com/lancedfr/hassio-hanchu-ess/compare/v0.3.0...HEAD
+[0.3.1]: https://github.com/lancedfr/hassio-hanchu-ess/compare/v0.3.1...HEAD
 [0.3.0]: https://github.com/lancedfr/hassio-hanchu-ess/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/lancedfr/hassio-hanchu-ess/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/lancedfr/hassio-hanchu-ess/releases/tag/v0.1.0

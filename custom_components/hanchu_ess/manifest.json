@@ -1,7 +1,7 @@
 {
   "domain": "hanchu",
   "name": "Hanchu ESS",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "config_flow": true,
   "documentation": "https://github.com/lancedfr/hassio-hanchu-ess",
   "issue_tracker": "https://github.com/lancedfr/hassio-hanchu-ess/issues",
