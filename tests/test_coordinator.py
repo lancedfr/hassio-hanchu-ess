@@ -258,14 +258,15 @@ class TestHanchuDataCoordinator(unittest.IsolatedAsyncioTestCase):
 
     # ── happy path ────────────────────────────────────────────────────────
 
-    async def test_sums_all_year_values(self) -> None:
-        """Sums energy fields across all years returned by the API."""
+    async def test_returns_current_year_values(self) -> None:
+        """Returns the 6 energy fields extracted from the current year's record."""
         from datetime import datetime
 
         current_year = datetime.now().year
         records = [
             _year_record(current_year - 1, loadEe=500.0),
-            _year_record(current_year),           # loadEe=1000.0 (default)
+            _year_record(current_year),
+            _year_record(current_year + 1, loadEe=9999.0),  # future, ignored
         ]
         coord = _make_data_coordinator()
         session, _ = _data_session(payload={"code": 200, "data": records})
@@ -273,12 +274,12 @@ class TestHanchuDataCoordinator(unittest.IsolatedAsyncioTestCase):
         with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             result = await coord._async_update_data()
 
-        self.assertEqual(result["load"],       1500.0)  # 500 + 1000
-        self.assertEqual(result["generation"], 1600.0)  # 800 × 2
-        self.assertEqual(result["charge"],      400.0)  # 200 × 2
-        self.assertEqual(result["discharge"],   360.0)  # 180 × 2
-        self.assertEqual(result["from_grid"],   600.0)  # 300 × 2
-        self.assertEqual(result["to_grid"],     200.0)  # 100 × 2
+        self.assertEqual(result["load"],       1000.0)
+        self.assertEqual(result["generation"], 800.0)
+        self.assertEqual(result["charge"],     200.0)
+        self.assertEqual(result["discharge"],  180.0)
+        self.assertEqual(result["from_grid"],  300.0)
+        self.assertEqual(result["to_grid"],    100.0)
 
     async def test_success_with_code_20001(self) -> None:
         """code=20001 is also a valid success code."""
@@ -399,12 +400,12 @@ class TestHanchuDataCoordinator(unittest.IsolatedAsyncioTestCase):
             with self.assertRaises(ConfigEntryAuthFailed):
                 await coord._async_update_data()
 
-    async def test_empty_data_raises_update_failed(self) -> None:
-        """Raises UpdateFailed when the API returns no records."""
+    async def test_missing_current_year_raises_update_failed(self) -> None:
+        """Raises UpdateFailed when no record matches the current year."""
         from homeassistant.helpers.update_coordinator import UpdateFailed
 
         coord = _make_data_coordinator()
-        session, _ = _data_session(payload={"code": 200, "data": []})
+        session, _ = _data_session(payload={"code": 200, "data": [_year_record(1999)]})
 
         with patch("custom_components.hanchu_ess.coordinator.async_get_clientsession", return_value=session):
             with self.assertRaises(UpdateFailed):

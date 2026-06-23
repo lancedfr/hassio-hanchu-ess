@@ -5,7 +5,7 @@ from __future__ import annotations
 import base64
 import json
 import logging
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 import aiohttp
 from cryptography.hazmat.primitives import padding as sym_padding
@@ -185,7 +185,7 @@ class HanchuDataCoordinator(DataUpdateCoordinator[dict]):
         self._auth = auth
 
     async def _async_update_data(self) -> dict:
-        """Fetch lifetime energy totals (sum of all years) from the API."""
+        """Fetch yearly energy totals for the current year."""
         token = self._auth.access_token
         if not token:
             raise UpdateFailed("No auth token available — waiting for auth coordinator")
@@ -224,21 +224,19 @@ class HanchuDataCoordinator(DataUpdateCoordinator[dict]):
             )
 
         records: list[dict] = result.get("data") or []
-        if not records:
-            raise UpdateFailed("No energy data returned")
+        current_year = str(datetime.now().year)
+        year_data = next((r for r in records if r.get("date") == current_year), None)
+        if year_data is None:
+            raise UpdateFailed(f"No energy data found for year {current_year}")
 
-        totals: dict[str, float] = {
-            "load": 0.0, "generation": 0.0, "charge": 0.0,
-            "discharge": 0.0, "from_grid": 0.0, "to_grid": 0.0,
+        return {
+            "load":       float(year_data.get("loadEe") or 0),
+            "generation": float(year_data.get("pvDge") or 0),
+            "charge":     float(year_data.get("batTdChg") or 0),
+            "discharge":  float(year_data.get("batTdDschg") or 0),
+            "from_grid":  float(year_data.get("gridTdEe") or 0),
+            "to_grid":    float(year_data.get("gridTdFe") or 0),
         }
-        for record in records:
-            totals["load"]       += float(record.get("loadEe") or 0)
-            totals["generation"] += float(record.get("pvDge") or 0)
-            totals["charge"]     += float(record.get("batTdChg") or 0)
-            totals["discharge"]  += float(record.get("batTdDschg") or 0)
-            totals["from_grid"]  += float(record.get("gridTdEe") or 0)
-            totals["to_grid"]    += float(record.get("gridTdFe") or 0)
-        return totals
 
 
 class HanchuPowerCoordinator(DataUpdateCoordinator[dict]):
